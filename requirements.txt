@@ -1,0 +1,4 @@
+oauthlib~=3.2.2
+Flask~=2.2.2
+python-dotenv~=0.21.0
+requests~=2.28.1

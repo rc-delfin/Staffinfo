@@ -1,0 +1,78 @@
+{% extends 'base.html' %} {% block body %}
+<style>
+    ul{
+        list-style-type: none;
+    }
+    ul,li { list-style-type: none;
+        list-style-position:inside;
+        margin:0;
+        padding:0;
+    }
+    ul > li {
+        padding-bottom:10px;
+        padding-left:40px;
+    }
+    input[type=radio] {
+        border: 0;
+        width: 1.5em;
+        height: 1.5em;
+        float:left;
+        margin-right:5px;
+    }
+    #index_page{
+        font-size:1em;
+    }
+    h5{
+        margin-bottom:20px;
+        font-size:1.1em;
+    }
+    .column-header{
+        min-width:130px;
+        float:left;
+        padding-top:5px;
+        padding-bottom:5px;
+    }
+    .column-data{
+        float:left;
+        padding-top:5px;
+        padding-bottom:5px;
+    }
+</style>
+
+<div style="padding: 0 0px 0 0px;">
+    <div>
+        <div style="border:0px solid #dcdcdc;width:275px;height:275px;margin-left:auto;margin-right:auto;margin-bottom:30px;">
+            <img src={{picture}} style="width:275px;height:275px;border-radius:8px;">
+        </div>
+        <table class="table" style="font-size:.9em;padding-left:10px;padding-right:30px;">
+              <tbody>
+                    <tr>
+                          <th scope="row" style="width:120px;">Resno</th>
+                          <td>{{ resno }}</td>
+                    </tr>
+                    <tr>
+                          <th scope="row">Name</th>
+                          <td>{{ name }}</td>
+                    </tr>
+                    <tr>
+                          <th scope="row">{{ label }}</th>
+                          <td>{{ label_value }}</td>
+                    </tr>
+                    <tr>
+                          <th scope="row">Resource Type</th>
+                          <td>{{ resource_type }}</td>
+                    </tr>
+                    <tr>
+                          <th scope="row">Start Date</th>
+                          <td>{{ start_date }}</td>
+                    </tr>
+                    <tr>
+                          <th scope="row">Profile</th>
+                          <td>{{ profile }}</td>
+                    </tr>
+              </tbody>
+        </table>
+<!--        <div style="border-bottom: 1px solid #cccccc;height:1px;clear: left; padding-top:40px;"></div>-->
+    </div>
+</div>
+{% endblock %}

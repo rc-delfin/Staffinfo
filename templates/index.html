@@ -1,0 +1,41 @@
+{% extends 'base.html' %} {% block body %}
+<style>
+    ul{
+        list-style-type: none;
+    }
+    ul,li { list-style-type: none;
+        list-style-position:inside;
+        margin:0;
+        padding:0;
+    }
+    ul > li {
+        padding-bottom:10px;
+        padding-left:40px;
+    }
+    input[type=radio] {
+        border: 0;
+        width: 1.5em;
+        height: 1.5em;
+        float:left;
+        margin-right:5px;
+    }
+    #index_page{
+        font-size:1em;
+    }
+    h5{
+        margin-bottom:20px;
+        font-size:1.1em;
+    }
+</style>
+
+<div id="index_page">
+    <div style="margin-bottom:40px;">
+        <div style="float:left">
+            <h5>
+                <div><a onclick=window.open('{{ url_for("staffinfo", resno="") }}','','popup=1,width=376,height=650');><span style="text-decoration:underline;cursor:pointer;">Staff info</span></a></div>
+            </h5>
+        </div>
+        <div style="border-bottom: 1px solid #cccccc;height:1px;clear: left; padding-top:40px;"></div>
+    </div>
+</div>
+{% endblock %}
