@@ -97,51 +97,67 @@ def page_not_found(self):
 def template_not_found(self):
     return render_template(
         "error.html",
-        error_message_title="Ooops...that's a 404 HTML code",
+        error_message_title="Ooops...that's a 500 HTML code",
         error_message="You seem to be missing some text. Maybe a resno?",
     )
 
 
-@app.route('/<resno>', methods=["GET", "POST"])
-def landing_page(resno):
+@app.route('/', methods=["GET", "POST"])
+def landing_page():
     if not google.authorized:
         return redirect(url_for("google.login"))
 
-    resp = google.get("/oauth2/v2/userinfo")
-    assert resp.ok, resp.text
+    return '', 204
 
-    payload = {}
-    api_key = os.getenv("XAPI_SHH")
-    base_uri = os.getenv("BASE_URI")
-    base_uri_get_pic = base_uri + "getpic?resno=" + resno
-    base_uri_get_info = base_uri + "getinfo?resno=" + resno
-    headers = {"X-API-KEY": api_key}
-    response_pic = requests.request("GET", base_uri_get_pic, headers=headers, data=payload)
-    response_info = requests.request("GET", base_uri_get_info, headers=headers, data=payload)
-    print(json.loads(response_info.text))
-    staff_info=json.loads(response_info.text)
 
-    resno = staff_info["resno"]
-    name = staff_info["name"]
-    label = staff_info["label"]
-    label_value = staff_info["label_value"]
-    resource_type = staff_info["resource_type"]
-    start_date = staff_info["start_date"]
-    profile = staff_info["profile"]
-    # session["picture"] = "data:image/png;base64," + r.text
-    picture = "data:image/png;base64," + response_pic.text
+@app.route('/staffinfo/<resno>', methods=["GET", "POST"])
+def staffinfo(resno):
+    if not google.authorized:
+        return redirect(url_for("google.login"))
 
-    return render_template(
-        'staffinfo.html',
-        resno=resno,
-        name=name,
-        label=label,
-        label_value=label_value,
-        resource_type=resource_type,
-        start_date=start_date,
-        profile=profile,
-        picture=picture,
-    )
+    if resno != "":
+        resp = google.get("/oauth2/v2/userinfo")
+        assert resp.ok, resp.text
+
+        payload = {}
+        api_key = os.getenv("XAPI_SHH")
+        base_uri = os.getenv("BASE_URI")
+        base_uri_get_pic = base_uri + "getpic?resno=" + resno
+        base_uri_get_info = base_uri + "getinfo?resno=" + resno
+        headers = {"X-API-KEY": api_key}
+        response_pic = requests.request("GET", base_uri_get_pic, headers=headers, data=payload)
+        response_info = requests.request("GET", base_uri_get_info, headers=headers, data=payload)
+        print(json.loads(response_info.text))
+        staff_info=json.loads(response_info.text)
+
+        resno = staff_info["resno"]
+        name = staff_info["name"]
+        label = staff_info["label"]
+        label_value = staff_info["label_value"]
+        resource_type = staff_info["resource_type"]
+        start_date = staff_info["start_date"]
+        profile = staff_info["profile"]
+        # session["picture"] = "data:image/png;base64," + r.text
+        picture = "data:image/png;base64," + response_pic.text
+
+        return render_template(
+            'staffinfo.html',
+            resno=resno,
+            name=name,
+            label=label,
+            label_value=label_value,
+            resource_type=resource_type,
+            start_date=start_date,
+            profile=profile,
+            picture=picture,
+        )
+
+    else:
+        return render_template(
+            'error.html',
+            error_message_title="Error",
+            error_message="An error has occurred. Please contact MIS.",
+        )
 
 
 if __name__ == '__main__':
