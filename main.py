@@ -107,7 +107,9 @@ def landing_page():
     if not google.authorized:
         return redirect(url_for("google.login"))
 
-    return '', 204
+    return render_template(
+            'index.html',
+        )
 
 
 @app.route('/staffinfo/<resno>', methods=["GET", "POST"])
