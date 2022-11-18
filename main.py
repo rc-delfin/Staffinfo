@@ -95,7 +95,9 @@ def staffinfo():
     headers = {"X-API-KEY": api_key}
     response_pic = requests.request("GET", base_uri_get_pic, headers=headers, data=payload)
     response_info = requests.request("GET", base_uri_get_info, headers=headers, data=payload)
-    staff_info = json.loads(response_info.text)
+    # staff_info = json.loads(response_info.text)
+    staff_info = response_info.json()
+    print(staff_info)
 
     resno = session["resno"]
     name = staff_info["name"]
