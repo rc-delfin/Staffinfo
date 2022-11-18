@@ -10,7 +10,7 @@ from flask import (
 )
 
 from flask_dance.contrib.google import make_google_blueprint, google
-from oauthlib.oauth2.rfc6749.errors import InvalidClientIdError, TokenExpiredError
+from oauthlib.oauth2.rfc6749.errors import InvalidClientIdError
 from dotenv import load_dotenv
 
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
@@ -19,7 +19,7 @@ load_dotenv()
 
 def _empty_session():
     """
-    Deletes the google token and clears the session
+    Deletes the Google token and clears the session
     """
     if "google" in current_app.blueprints and hasattr(
             current_app.blueprints["google"], "token"
@@ -91,20 +91,22 @@ def staffinfo():
     api_key = os.getenv("XAPI_SHH")
     base_uri = os.getenv("BASE_URI")
     base_uri_get_pic = base_uri + "getpic?resno=" + session["resno"]
-    base_uri_get_info = base_uri + "getinfo?resno=" + session["resno"]
+    base_uri_get_info = base_uri + "getinfo_v2?resno=" + session["resno"]
     headers = {"X-API-KEY": api_key}
     response_pic = requests.request("GET", base_uri_get_pic, headers=headers, data=payload)
     response_info = requests.request("GET", base_uri_get_info, headers=headers, data=payload)
     staff_info = json.loads(response_info.text)
 
-    resno = staff_info["resno"]
+    resno = session["resno"]
     name = staff_info["name"]
-    label = staff_info["label"]
-    label_value = staff_info["label_value"]
+    if staff_info["resource_type"] == "NRS" or staff_info["resource_type"] == "GRS":
+        label = "Position"
+    else:
+        label = "Appointment Category"
+    label_value = staff_info["positionapptcat"]
     resource_type = staff_info["resource_type"]
     start_date = staff_info["start_date"]
     profile = staff_info["profile"]
-    # session["picture"] = "data:image/png;base64," + r.text
     picture = "data:image/png;base64," + response_pic.text
 
     return render_template(

@@ -9,3 +9,4 @@ zappa_settings.json
 scratch*
 jumpoff*
 main*.py
+stub*.*
