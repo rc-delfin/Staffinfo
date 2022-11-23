@@ -45,6 +45,40 @@ google_bp = make_google_blueprint(
 
 app.register_blueprint(google_bp, url_prefix="/login")
 
+api_key = os.getenv("XAPI_SHH")
+base_uri = os.getenv("BASE_URI")
+
+
+def getStaffPic(resno):
+    base_uri_get_pic = base_uri + "getpic?resno=" + resno
+    headers = {"X-API-KEY": api_key}
+    payload = {}
+    response_pic = requests.request("GET", base_uri_get_pic, headers=headers, data=payload)
+    print("response_pic: " + response_pic.text)
+    if response_pic == 'RESNO not found':
+        return "RESNO not found"
+    else:
+        return response_pic.text
+
+
+def getStaffInfo(resno):
+    base_uri_get_info = base_uri + "getinfo_v2?resno=" + resno
+    headers = {"X-API-KEY": api_key}
+    payload = {}
+    response_info = requests.request("GET", base_uri_get_info, headers=headers, data=payload)
+    print("response_info: " + response_info.text)
+    if response_info.text == "RESNO not found":
+        return {
+                    "name": "-",
+                    "positionapptcat": "-",
+                    "profile": "",
+                    "resid": resno,
+                    "resource_type": "-",
+                    "start_date": "-"
+                }
+    else:
+        return response_info.json()
+
 
 @app.errorhandler(oauthlib.oauth2.rfc6749.errors.TokenExpiredError)
 @app.errorhandler(oauthlib.oauth2.rfc6749.errors.InvalidClientIdError)
@@ -82,24 +116,14 @@ def login():
 @app.route('/staffinfo', methods=["GET", "POST"])
 def staffinfo():
     args = request.args
-    session["resno"] = args.get("resno")
+    resno = args.get("resno")
+    print("Resno: " + resno)
 
     if not google.authorized:
         return redirect(url_for("google.login"))
 
-    payload = {}
-    api_key = os.getenv("XAPI_SHH")
-    base_uri = os.getenv("BASE_URI")
-    base_uri_get_pic = base_uri + "getpic?resno=" + session["resno"]
-    base_uri_get_info = base_uri + "getinfo_v2?resno=" + session["resno"]
-    headers = {"X-API-KEY": api_key}
-    response_pic = requests.request("GET", base_uri_get_pic, headers=headers, data=payload)
-    response_info = requests.request("GET", base_uri_get_info, headers=headers, data=payload)
-    # staff_info = json.loads(response_info.text)
-    staff_info = response_info.json()
-    print(staff_info)
-
-    resno = session["resno"]
+    print("getting staff info...")
+    staff_info = getStaffInfo(resno)
     name = staff_info["name"]
     if staff_info["resource_type"] == "NRS" or staff_info["resource_type"] == "GRS":
         label = "Position"
@@ -109,7 +133,10 @@ def staffinfo():
     resource_type = staff_info["resource_type"]
     start_date = staff_info["start_date"]
     profile = staff_info["profile"]
-    picture = "data:image/png;base64," + response_pic.text
+
+    print("getting staff pic...")
+    staff_pic = getStaffPic(resno)
+    picture = "data:image/png;base64," + staff_pic
 
     return render_template(
         'staffinfo.html',

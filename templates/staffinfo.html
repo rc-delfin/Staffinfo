@@ -42,7 +42,11 @@
 <div style="padding: 0 0px 0 0px;">
     <div>
         <div style="border:0px solid #dcdcdc;width:275px;height:275px;margin-left:auto;margin-right:auto;margin-bottom:30px;">
-            <img src={{picture}} style="width:275px;height:275px;border-radius:8px;">
+            {% if picture == 'data:image/png;base64,RESNO not found' %}
+                <div style="width:275px;height:275px;border-radius:8px;border:1px solid #dcdcdc;background-color:#eeeeee;text-align:center;padding-top:45%;color:#999999;">No image to display</div>
+            {% else %}
+                <img src={{picture}} style="width:275px;height:275px;border-radius:8px;">
+            {% endif %}
         </div>
         <table class="table" style="font-size:.9em;padding-left:10px;padding-right:30px;">
               <tbody>
@@ -54,10 +58,12 @@
                           <th scope="row">Name</th>
                           <td>{{ name }}</td>
                     </tr>
+                    {% if label_value != 'AET Temp' %}
                     <tr>
                           <th scope="row">{{ label }}</th>
                           <td>{{ label_value }}</td>
                     </tr>
+                    {% endif %}
                     <tr>
                           <th scope="row">Resource Type</th>
                           <td>{{ resource_type }}</td>
