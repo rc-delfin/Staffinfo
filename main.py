@@ -40,7 +40,7 @@ google_bp = make_google_blueprint(
         "openid",
         "https://www.googleapis.com/auth/userinfo.profile",
     ],
-    redirect_to="login",
+    redirect_to="staffinfo",
 )
 
 app.register_blueprint(google_bp, url_prefix="/login")
@@ -54,7 +54,7 @@ def getStaffPic(resno):
     headers = {"X-API-KEY": api_key}
     payload = {}
     response_pic = requests.request("GET", base_uri_get_pic, headers=headers, data=payload)
-    print("response_pic: " + response_pic.text)
+    print("response_pic: " + "got pic")  # response_pic.text)
     if response_pic == 'RESNO not found':
         return "RESNO not found"
     else:
@@ -69,13 +69,13 @@ def getStaffInfo(resno):
     print("response_info: " + response_info.text)
     if response_info.text == "RESNO not found":
         return {
-                    "name": "-",
-                    "positionapptcat": "-",
-                    "profile": "",
-                    "resid": resno,
-                    "resource_type": "-",
-                    "start_date": "-"
-                }
+            "name": "-",
+            "positionapptcat": "-",
+            "profile": "",
+            "resid": resno,
+            "resource_type": "-",
+            "start_date": "-"
+        }
     else:
         return response_info.json()
 
@@ -110,45 +110,50 @@ def template_not_found(self):
 def login():
     if not google.authorized:
         return redirect(url_for("google.login"))
-    return redirect(url_for("staffinfo", resno=session["resno"]))
+    return render_template(
+        "error.html",
+        error_message_title="This is an IRRI managed page",
+        error_message="You should not be here. Please check the address you entered and try again.",
+    )
 
 
 @app.route('/staffinfo', methods=["GET", "POST"])
 def staffinfo():
-    args = request.args
-    resno = args.get("resno")
-    print("Resno: " + resno)
-
     if not google.authorized:
+        session["resno"] = request.args.get("resno")
+        print("121 Resno: " + session["resno"])
         return redirect(url_for("google.login"))
 
-    print("getting staff info...")
-    staff_info = getStaffInfo(resno)
-    name = staff_info["name"]
-    if staff_info["resource_type"] == "NRS" or staff_info["resource_type"] == "GRS":
-        label = "Position"
     else:
-        label = "Appointment Category"
-    label_value = staff_info["positionapptcat"]
-    resource_type = staff_info["resource_type"]
-    start_date = staff_info["start_date"]
-    profile = staff_info["profile"]
+        resno = request.args.get("resno")
 
-    print("getting staff pic...")
-    staff_pic = getStaffPic(resno)
-    picture = "data:image/png;base64," + staff_pic
+        print("getting staff info...")
+        staff_info = getStaffInfo(resno)
+        name = staff_info["name"]
+        if staff_info["resource_type"] == "NRS" or staff_info["resource_type"] == "GRS":
+            label = "Position"
+        else:
+            label = "Appointment Category"
+        label_value = staff_info["positionapptcat"]
+        resource_type = staff_info["resource_type"]
+        start_date = staff_info["start_date"]
+        profile = staff_info["profile"]
 
-    return render_template(
-        'staffinfo.html',
-        resno=resno,
-        name=name,
-        label=label,
-        label_value=label_value,
-        resource_type=resource_type,
-        start_date=start_date,
-        profile=profile,
-        picture=picture,
-    )
+        print("getting staff pic...")
+        staff_pic = getStaffPic(resno)
+        picture = "data:image/png;base64," + staff_pic
+
+        return render_template(
+            'staffinfo.html',
+            resno=resno,
+            name=name,
+            label=label,
+            label_value=label_value,
+            resource_type=resource_type,
+            start_date=start_date,
+            profile=profile,
+            picture=picture,
+        )
 
 
 if __name__ == '__main__':
