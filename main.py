@@ -1,21 +1,17 @@
-import requests
 import os
+import requests
 import oauthlib
-import json
 
 from flask import (
     Flask,
     render_template,
     request, redirect, url_for, session, current_app
 )
-
 from flask_dance.contrib.google import make_google_blueprint, google
-from oauthlib.oauth2.rfc6749.errors import InvalidClientIdError
 from dotenv import load_dotenv
 
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 load_dotenv()
-
 
 def _empty_session():
     """
@@ -26,7 +22,6 @@ def _empty_session():
     ):
         del current_app.blueprints["google"].token
     session.clear()
-
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "quizbeeapp123456789"
@@ -40,7 +35,7 @@ google_bp = make_google_blueprint(
         "openid",
         "https://www.googleapis.com/auth/userinfo.profile",
     ],
-    redirect_to="staffinfo",
+    redirect_to="staffinfo"
 )
 
 app.register_blueprint(google_bp, url_prefix="/login")
@@ -92,8 +87,8 @@ def token_expired(_):
 def page_not_found(self):
     return render_template(
         "error.html",
-        error_message_title="Ooops...that's a 404 HTML code",
-        error_message="You seem to be missing some text. Maybe a resno?",
+        error_message_title="Ooops...that's a 404 code",
+        error_message="This is an IRRI managed page. The resource you were looking for cannot be found.",
     )
 
 
@@ -101,59 +96,52 @@ def page_not_found(self):
 def template_not_found(self):
     return render_template(
         "error.html",
-        error_message_title="Ooops...that's a 500 HTML code",
-        error_message="You seem to be missing some text. Maybe a resno?",
-    )
-
-
-@app.route('/', methods=["GET", "POST"])
-def login():
-    if not google.authorized:
-        return redirect(url_for("google.login"))
-    return render_template(
-        "error.html",
-        error_message_title="This is an IRRI managed page",
-        error_message="You should not be here. Please check the address you entered and try again.",
+        error_message_title="Ooops...that's a 500 code",
+        error_message="This is an IRRI managed page. The server encountered an unexpected condition.",
     )
 
 
 @app.route('/staffinfo', methods=["GET", "POST"])
-def staffinfo():
+def index():
+    session["resno"] = request.args.get("resno")
     if not google.authorized:
-        session["resno"] = request.args.get("resno")
-        print("121 Resno: " + session["resno"])
         return redirect(url_for("google.login"))
+    return redirect(url_for("staffinfo", resno=session["resno"]))
 
+
+@app.route('/info', methods=["GET", "POST"])
+def staffinfo():
+    # resno = session["resno"]
+    # return resno
+    resno = session["resno"]
+
+    print("getting staff info..." + resno)
+    staff_info = getStaffInfo(resno)
+    name = staff_info["name"]
+    if staff_info["resource_type"] == "NRS" or staff_info["resource_type"] == "GRS":
+        label = "Position"
     else:
-        resno = request.args.get("resno")
+        label = "Appointment Category"
+    label_value = staff_info["positionapptcat"]
+    resource_type = staff_info["resource_type"]
+    start_date = staff_info["start_date"]
+    profile = staff_info["profile"]
 
-        print("getting staff info...")
-        staff_info = getStaffInfo(resno)
-        name = staff_info["name"]
-        if staff_info["resource_type"] == "NRS" or staff_info["resource_type"] == "GRS":
-            label = "Position"
-        else:
-            label = "Appointment Category"
-        label_value = staff_info["positionapptcat"]
-        resource_type = staff_info["resource_type"]
-        start_date = staff_info["start_date"]
-        profile = staff_info["profile"]
+    print("getting staff pic..." + resno)
+    staff_pic = getStaffPic(resno)
+    picture = "data:image/png;base64," + staff_pic
 
-        print("getting staff pic...")
-        staff_pic = getStaffPic(resno)
-        picture = "data:image/png;base64," + staff_pic
-
-        return render_template(
-            'staffinfo.html',
-            resno=resno,
-            name=name,
-            label=label,
-            label_value=label_value,
-            resource_type=resource_type,
-            start_date=start_date,
-            profile=profile,
-            picture=picture,
-        )
+    return render_template(
+        'staffinfo.html',
+        resno=resno,
+        name=name,
+        label=label,
+        label_value=label_value,
+        resource_type=resource_type,
+        start_date=start_date,
+        profile=profile,
+        picture=picture,
+    )
 
 
 if __name__ == '__main__':
