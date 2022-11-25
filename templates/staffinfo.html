@@ -1,4 +1,4 @@
-{% extends 'base.html' %} {% block body %}
+{% extends 'popupbase.html' %} {% block body %}
 <style>
     ul{
         list-style-type: none;
@@ -37,15 +37,18 @@
         padding-top:5px;
         padding-bottom:5px;
     }
+    th, td {
+        padding:6px!important;
+    }
 </style>
 
 <div style="padding: 0 0px 0 0px;">
     <div>
-        <div style="border:0px solid #dcdcdc;width:275px;height:275px;margin-left:auto;margin-right:auto;margin-bottom:30px;">
+        <div style="border:0px solid #dcdcdc;width:250px;height:250px;margin-left:auto;margin-right:auto;margin-bottom:30px;">
             {% if picture == 'data:image/png;base64,RESNO not found' %}
-                <div style="width:275px;height:275px;border-radius:8px;border:1px solid #dcdcdc;background-color:#eeeeee;text-align:center;padding-top:45%;color:#999999;">No image to display</div>
+                <div style="width:250px;height:250px;border-radius:8px;border:1px solid #dcdcdc;background-color:#eeeeee;text-align:center;padding-top:45%;color:#999999;">No image to display</div>
             {% else %}
-                <img src={{picture}} style="width:275px;height:275px;border-radius:8px;">
+                <img src={{picture}} style="width:250px;height:250px;border-radius:8px;">
             {% endif %}
         </div>
         <table class="table" style="font-size:.9em;padding-left:10px;padding-right:30px;">
